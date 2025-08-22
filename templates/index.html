@@ -1,12 +1,32 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Logic Evaluator</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>🔍 Logic Evaluator</h1>
+        <h1>
+            <span class="logo">
+                <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M30 10C20 10 12 18 12 28C12 38 20 46 30 46C40 46 48 38 48 28C48 18 40 10 30 10Z" fill="url(#brainGradient)"/>
+                    <path d="M25 20C25 22.2091 23.2091 24 21 24C18.7909 24 17 22.2091 17 20C17 17.7909 18.7909 16 21 16C23.2091 16 25 17.7909 25 20Z" fill="white" opacity="0.8"/>
+                    <path d="M43 20C43 22.2091 41.2091 24 39 24C36.7909 24 35 22.2091 35 20C35 17.7909 36.7909 16 39 16C41.2091 16 43 17.7909 43 20Z" fill="white" opacity="0.8"/>
+                    <path d="M30 32C27.7909 32 26 30.2091 26 28C26 25.7909 27.7909 24 30 24C32.2091 24 34 25.7909 34 28C34 30.2091 32.2091 32 30 32Z" fill="white" opacity="0.6"/>
+                    <path d="M22 36C22 37.1046 21.1046 38 20 38C18.8954 38 18 37.1046 18 36C18 34.8954 18.8954 34 20 34C21.1046 34 22 34.8954 22 36Z" fill="white" opacity="0.4"/>
+                    <path d="M42 36C42 37.1046 41.1046 38 40 38C38.8954 38 38 37.1046 38 36C38 34.8954 38.8954 34 40 34C41.1046 34 42 34.8954 42 36Z" fill="white" opacity="0.4"/>
+                    <defs>
+                        <linearGradient id="brainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </span> 
+            Logic Evaluator
+        </h1>
         
         <div class="input-section">
             <div class="variable-inputs">
@@ -36,6 +56,9 @@
             <div class="expression-input">
                 <label for="expr">Logical Expression:</label>
                 <input type="text" id="expr" placeholder="Enter expression (e.g., p and q or not r)" value="p and q">
+                <div class="examples">
+                    <small>Examples: p and q, p or q, not p, p and (q or r)</small>
+                </div>
             </div>
 
             <button onclick="evaluateExpression()">Evaluate</button>
@@ -44,6 +67,56 @@
         <div class="result-section">
             <h3>Result:</h3>
             <div id="result" class="result-box">-</div>
+        </div>
+
+        <div class="instructions">
+            <h3>How to use:</h3>
+            <ul>
+                <li>Select True/False for variables p, q, r</li>
+                <li>Enter a logical expression using: and, or, not</li>
+                <li>Use variables: p, q, r</li>
+                <li>Click Evaluate to see the result</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Contact Section -->
+    <div class="contact-section">
+        <div class="contact-container">
+            <h3>Contact Us</h3>
+            <div class="contact-grid">
+                <div class="contact-item">
+                    <span class="contact-icon">📧</span>
+                    <div class="contact-details">
+                        <h4>Email</h4>
+                        <a href="mailto:jatavaj09@gmail.com">jatavaj09@gmail.com</a>
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <span class="contact-icon">💼</span>
+                    <div class="contact-details">
+                        <h4>LinkedIn</h4>
+                        <a href="https://www.linkedin.com/in/ajay-jatav-b15428207?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" target="_blank">@ajay-jatav</a>
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <span class="contact-icon">🐙</span>
+                    <div class="contact-details">
+                        <h4>GitHub</h4>
+                        <a href="https://github.com/jatavajay" target="_blank">@jatavajay</a>
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <span class="contact-icon">📱</span>
+                    <div class="contact-details">
+                        <h4>Phone</h4>
+                        <a href="tel:+919876543210">+91 9876543210</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -54,7 +127,14 @@
             const r = document.getElementById('r').value;
             const expr = document.getElementById('expr').value.trim();
 
+            if (!expr) {
+                alert('Please enter a logical expression');
+                return;
+            }
+
+            // Show loading
             document.getElementById('result').textContent = 'Calculating...';
+            document.getElementById('result').className = 'result-box loading';
 
             fetch('/evaluate', {
                 method: 'POST',
@@ -70,12 +150,26 @@
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById('result').textContent = data.result;
+                if (data.error) {
+                    document.getElementById('result').textContent = 'Error: ' + data.error;
+                    document.getElementById('result').className = 'result-box error';
+                } else {
+                    document.getElementById('result').textContent = data.result;
+                    document.getElementById('result').className = 'result-box success';
+                }
             })
             .catch(error => {
                 document.getElementById('result').textContent = 'Error: ' + error;
+                document.getElementById('result').className = 'result-box error';
             });
         }
+
+        // Allow pressing Enter to evaluate
+        document.getElementById('expr').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                evaluateExpression();
+            }
+        });
     </script>
 </body>
 </html>
