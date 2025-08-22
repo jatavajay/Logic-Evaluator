@@ -4,6 +4,9 @@ import os
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
 def LogicEval(p, q, r, expr):
+    # Debug print
+    print(f"Evaluating: p={p}, q={q}, r={r}, expr='{expr}'")
+    
     # Replace variables with their values
     expr = expr.replace("p", str(p))
     expr = expr.replace("q", str(q))
@@ -127,19 +130,34 @@ def index():
 def evaluate():
     try:
         data = request.get_json()
+        print(f"Received data: {data}")
+        
         p = data.get('p', False)
         q = data.get('q', False)
         r = data.get('r', False)
         expr = data.get('expr', '')
         
-        p = p.lower() == 'true' if isinstance(p, str) else bool(p)
-        q = q.lower() == 'true' if isinstance(q, str) else bool(q)
-        r = r.lower() == 'true' if isinstance(r, str) else bool(r)
+        # Convert to boolean (handle both string and boolean inputs)
+        if isinstance(p, str):
+            p = p.lower() == 'true'
+        if isinstance(q, str):
+            q = q.lower() == 'true'
+        if isinstance(r, str):
+            r = r.lower() == 'true'
         
-        expr = expr.strip().lower()
+        p = bool(p)
+        q = bool(q)
+        r = bool(r)
+        
+        print(f"Boolean values - p: {p}, q: {q}, r: {r}")
+        print(f"Expression: {expr}")
+        
         result = LogicEval(p, q, r, expr)
+        print(f"Result: {result}")
+        
         return jsonify({'result': str(result)})
     except Exception as e:
+        print(f"Error: {str(e)}")
         return jsonify({'error': f'Evaluation error: {str(e)}'})
 
 if __name__ == '__main__':
