@@ -121,55 +121,54 @@
     </div>
 
     <script>
-        function evaluateExpression() {
-            const p = document.getElementById('p').value;
-            const q = document.getElementById('q').value;
-            const r = document.getElementById('r').value;
-            const expr = document.getElementById('expr').value.trim();
+    function evaluateExpression() {
+        const p = document.getElementById('p').value === 'true';
+        const q = document.getElementById('q').value === 'true';
+        const r = document.getElementById('r').value === 'true';
+        const expr = document.getElementById('expr').value.trim();
 
-            if (!expr) {
-                alert('Please enter a logical expression');
-                return;
-            }
-
-            // Show loading
-            document.getElementById('result').textContent = 'Calculating...';
-            document.getElementById('result').className = 'result-box loading';
-
-            fetch('/evaluate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    p: p,
-                    q: q,
-                    r: r,
-                    expr: expr
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    document.getElementById('result').textContent = 'Error: ' + data.error;
-                    document.getElementById('result').className = 'result-box error';
-                } else {
-                    document.getElementById('result').textContent = data.result;
-                    document.getElementById('result').className = 'result-box success';
-                }
-            })
-            .catch(error => {
-                document.getElementById('result').textContent = 'Error: ' + error;
-                document.getElementById('result').className = 'result-box error';
-            });
+        if (!expr) {
+            alert('Please enter a logical expression');
+            return;
         }
 
-        // Allow pressing Enter to evaluate
-        document.getElementById('expr').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                evaluateExpression();
+        document.getElementById('result').textContent = 'Calculating...';
+        document.getElementById('result').className = 'result-box loading';
+
+        fetch('/evaluate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                p: p,
+                q: q,
+                r: r,
+                expr: expr
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('result').textContent = 'Error: ' + data.error;
+                document.getElementById('result').className = 'result-box error';
+            } else {
+                document.getElementById('result').textContent = data.result;
+                document.getElementById('result').className = 'result-box success';
             }
+        })
+        .catch(error => {
+            document.getElementById('result').textContent = 'Error: ' + error;
+            document.getElementById('result').className = 'result-box error';
         });
-    </script>
+    }
+
+    // Allow pressing Enter to evaluate
+    document.getElementById('expr').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            evaluateExpression();
+        }
+    });
+</script>
 </body>
 </html>
