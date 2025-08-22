@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Logic Evaluator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Logic Evaluator</h1>
+        
+        <div class="input-section">
+            <div class="variable-inputs">
+                <div class="input-group">
+                    <label for="p">p:</label>
+                    <select id="p">
+                        <option value="True">True</option>
+                        <option value="False">False</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="q">q:</label>
+                    <select id="q">
+                        <option value="True">True</option>
+                        <option value="False">False</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="r">r:</label>
+                    <select id="r">
+                        <option value="True">True</option>
+                        <option value="False">False</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="expression-input">
+                <label for="expr">Logical Expression:</label>
+                <input type="text" id="expr" placeholder="Enter expression (e.g., p and q or not r)" value="p and q">
+            </div>
+
+            <button onclick="evaluateExpression()">Evaluate</button>
+        </div>
+
+        <div class="result-section">
+            <h3>Result:</h3>
+            <div id="result" class="result-box">-</div>
+        </div>
+    </div>
+
+    <script>
+        function evaluateExpression() {
+            const p = document.getElementById('p').value;
+            const q = document.getElementById('q').value;
+            const r = document.getElementById('r').value;
+            const expr = document.getElementById('expr').value.trim();
+
+            document.getElementById('result').textContent = 'Calculating...';
+
+            fetch('/evaluate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    p: p,
+                    q: q,
+                    r: r,
+                    expr: expr
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').textContent = data.result;
+            })
+            .catch(error => {
+                document.getElementById('result').textContent = 'Error: ' + error;
+            });
+        }
+    </script>
+</body>
+</html>
