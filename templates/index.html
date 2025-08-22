@@ -5,8 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Logic Evaluator</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
+    <div class="theme-switch-wrapper">
+        <label class="theme-switch" for="theme-checkbox">
+            <input type="checkbox" id="theme-checkbox">
+            <div class="slider round">
+                <span class="sun">☀️</span>
+                <span class="moon">🌙</span>
+            </div>
+        </label>
+    </div>
+
     <div class="container">
         <h1>
             <span class="logo">
@@ -33,22 +44,22 @@
                 <div class="input-group">
                     <label for="p">p:</label>
                     <select id="p">
-                        <option value="True">True</option>
-                        <option value="False">False</option>
+                        <option value="true">True</option>
+                        <option value="false">False</option>
                     </select>
                 </div>
                 <div class="input-group">
                     <label for="q">q:</label>
                     <select id="q">
-                        <option value="True">True</option>
-                        <option value="False">False</option>
+                        <option value="true">True</option>
+                        <option value="false">False</option>
                     </select>
                 </div>
                 <div class="input-group">
                     <label for="r">r:</label>
                     <select id="r">
-                        <option value="True">True</option>
-                        <option value="False">False</option>
+                        <option value="true">True</option>
+                        <option value="false">False</option>
                     </select>
                 </div>
             </div>
@@ -61,7 +72,9 @@
                 </div>
             </div>
 
-            <button onclick="evaluateExpression()">Evaluate</button>
+            <button onclick="evaluateExpression()">
+                <i class="fas fa-calculator"></i> Evaluate
+            </button>
         </div>
 
         <div class="result-section">
@@ -70,12 +83,13 @@
         </div>
 
         <div class="instructions">
-            <h3>How to use:</h3>
+            <h3><i class="fas fa-info-circle"></i> How to use:</h3>
             <ul>
                 <li>Select True/False for variables p, q, r</li>
                 <li>Enter a logical expression using: and, or, not</li>
                 <li>Use variables: p, q, r</li>
                 <li>Click Evaluate to see the result</li>
+                <li>Toggle the theme switch for dark/light mode</li>
             </ul>
         </div>
     </div>
@@ -83,7 +97,7 @@
     <!-- Contact Section -->
     <div class="contact-section">
         <div class="contact-container">
-            <h3>Contact Us</h3>
+            <h3><i class="fas fa-envelope"></i> Contact Us</h3>
             <div class="contact-grid">
                 <div class="contact-item">
                     <span class="contact-icon">📧</span>
@@ -97,7 +111,7 @@
                     <span class="contact-icon">💼</span>
                     <div class="contact-details">
                         <h4>LinkedIn</h4>
-                        <a href="https://www.linkedin.com/in/ajay-jatav-b15428207?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" target="_blank">@ajay-jatav</a>
+                        <a href="https://www.linkedin.com/in/ajay-jatav-b15428207" target="_blank">@ajay-jatav</a>
                     </div>
                 </div>
                 
@@ -121,54 +135,82 @@
     </div>
 
     <script>
-    function evaluateExpression() {
-        const p = document.getElementById('p').value === 'true';
-        const q = document.getElementById('q').value === 'true';
-        const r = document.getElementById('r').value === 'true';
-        const expr = document.getElementById('expr').value.trim();
-
-        if (!expr) {
-            alert('Please enter a logical expression');
-            return;
+        // Theme switching functionality
+        const themeSwitch = document.getElementById('theme-checkbox');
+        
+        // Check for saved theme preference or respect OS preference
+        if (localStorage.getItem('theme') === 'dark' || 
+            (window.matchMedia('(prefers-color-scheme: dark)').matches && !localStorage.getItem('theme'))) {
+            document.body.classList.add('dark-theme');
+            themeSwitch.checked = true;
         }
 
-        document.getElementById('result').textContent = 'Calculating...';
-        document.getElementById('result').className = 'result-box loading';
-
-        fetch('/evaluate', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                p: p,
-                q: q,
-                r: r,
-                expr: expr
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                document.getElementById('result').textContent = 'Error: ' + data.error;
-                document.getElementById('result').className = 'result-box error';
+        themeSwitch.addEventListener('change', function() {
+            if (this.checked) {
+                document.body.classList.add('dark-theme');
+                localStorage.setItem('theme', 'dark');
             } else {
-                document.getElementById('result').textContent = data.result;
-                document.getElementById('result').className = 'result-box success';
+                document.body.classList.remove('dark-theme');
+                localStorage.setItem('theme', 'light');
             }
-        })
-        .catch(error => {
-            document.getElementById('result').textContent = 'Error: ' + error;
-            document.getElementById('result').className = 'result-box error';
         });
-    }
 
-    // Allow pressing Enter to evaluate
-    document.getElementById('expr').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
+        function evaluateExpression() {
+            // Get values as strings "true"/"false" and convert to actual booleans
+            const p = document.getElementById('p').value === 'true';
+            const q = document.getElementById('q').value === 'true';
+            const r = document.getElementById('r').value === 'true';
+            const expr = document.getElementById('expr').value.trim();
+
+            if (!expr) {
+                alert('Please enter a logical expression');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('result').textContent = 'Calculating...';
+            document.getElementById('result').className = 'result-box loading';
+
+            fetch('/evaluate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    p: p,  // Now sending actual boolean values
+                    q: q,
+                    r: r,
+                    expr: expr
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('result').textContent = 'Error: ' + data.error;
+                    document.getElementById('result').className = 'result-box error';
+                } else {
+                    document.getElementById('result').textContent = data.result;
+                    document.getElementById('result').className = 'result-box success';
+                }
+            })
+            .catch(error => {
+                document.getElementById('result').textContent = 'Error: ' + error;
+                document.getElementById('result').className = 'result-box error';
+            });
+        }
+
+        // Allow pressing Enter to evaluate
+        document.getElementById('expr').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                evaluateExpression();
+            }
+        });
+
+        // Quick test buttons
+        function quickTest(expression) {
+            document.getElementById('expr').value = expression;
             evaluateExpression();
         }
-    });
-</script>
+    </script>
 </body>
 </html>
