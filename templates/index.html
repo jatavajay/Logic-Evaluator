@@ -5,33 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Logic Evaluator</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div class="theme-switch-wrapper">
-        <label class="theme-switch" for="theme-checkbox">
-            <input type="checkbox" id="theme-checkbox">
-            <div class="slider round">
-                <span class="sun">☀️</span>
-                <span class="moon">🌙</span>
-            </div>
-        </label>
-    </div>
-
     <div class="container">
         <h1>
             <span class="logo">
                 <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M30 10C20 10 12 18 12 28C12 38 20 46 30 46C40 46 48 38 48 28C48 18 40 10 30 10Z" fill="url(#brainGradient)"/>
-                    <path d="M25 20C25 22.2091 23.2091 24 21 24C18.7909 24 17 22.2091 17 20C17 17.7909 18.7909 16 21 16C23.2091 16 25 17.7909 25 20Z" fill="white" opacity="0.8"/>
-                    <path d="M43 20C43 22.2091 41.2091 24 39 24C36.7909 24 35 22.2091 35 20C35 17.7909 36.7909 16 39 16C41.2091 16 43 17.7909 43 20Z" fill="white" opacity="0.8"/>
-                    <path d="M30 32C27.7909 32 26 30.2091 26 28C26 25.7909 27.7909 24 30 24C32.2091 24 34 25.7909 34 28C34 30.2091 32.2091 32 30 32Z" fill="white" opacity="0.6"/>
-                    <path d="M22 36C22 37.1046 21.1046 38 20 38C18.8954 38 18 37.1046 18 36C18 34.8954 18.8954 34 20 34C21.1046 34 22 34.8954 22 36Z" fill="white" opacity="0.4"/>
-                    <path d="M42 36C42 37.1046 41.1046 38 40 38C38.8954 38 38 37.1046 38 36C38 34.8954 38.8954 34 40 34C41.1046 34 42 34.8954 42 36Z" fill="white" opacity="0.4"/>
+                    <!-- Logic Gate Icon -->
+                    <rect x="10" y="15" width="40" height="30" rx="4" fill="url(#logicGradient)" stroke="#2c3e50" stroke-width="2"/>
+                    
+                    <!-- Input lines -->
+                    <line x1="5" y1="25" x2="15" y2="25" stroke="#2c3e50" stroke-width="2"/>
+                    <line x1="5" y1="35" x2="15" y2="35" stroke="#2c3e50" stroke-width="2"/>
+                    
+                    <!-- Output line -->
+                    <line x1="45" y1="30" x2="55" y2="30" stroke="#2c3e50" stroke-width="2"/>
+                    
+                    <!-- Logic symbols -->
+                    <text x="30" y="35" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">∧</text>
+                    
+                    <!-- Input labels -->
+                    <text x="12" y="23" fill="white" font-family="Arial, sans-serif" font-size="8" font-weight="bold">A</text>
+                    <text x="12" y="33" fill="white" font-family="Arial, sans-serif" font-size="8" font-weight="bold">B</text>
+                    
+                    <!-- Output label -->
+                    <text x="48" y="28" fill="white" font-family="Arial, sans-serif" font-size="8" font-weight="bold">Y</text>
+                    
+                    <!-- Circuit dots -->
+                    <circle cx="15" cy="25" r="2" fill="#2c3e50"/>
+                    <circle cx="15" cy="35" r="2" fill="#2c3e50"/>
+                    <circle cx="45" cy="30" r="2" fill="#2c3e50"/>
+                    
                     <defs>
-                        <linearGradient id="brainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
-                            <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                        <linearGradient id="logicGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#3498db;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#2980b9;stop-opacity:1" />
                         </linearGradient>
                     </defs>
                 </svg>
@@ -44,22 +52,22 @@
                 <div class="input-group">
                     <label for="p">p:</label>
                     <select id="p">
-                        <option value="true">True</option>
-                        <option value="false">False</option>
+                        <option value="True">True</option>
+                        <option value="False">False</option>
                     </select>
                 </div>
                 <div class="input-group">
                     <label for="q">q:</label>
                     <select id="q">
-                        <option value="true">True</option>
-                        <option value="false">False</option>
+                        <option value="True">True</option>
+                        <option value="False">False</option>
                     </select>
                 </div>
                 <div class="input-group">
                     <label for="r">r:</label>
                     <select id="r">
-                        <option value="true">True</option>
-                        <option value="false">False</option>
+                        <option value="True">True</option>
+                        <option value="False">False</option>
                     </select>
                 </div>
             </div>
@@ -72,9 +80,7 @@
                 </div>
             </div>
 
-            <button onclick="evaluateExpression()">
-                <i class="fas fa-calculator"></i> Evaluate
-            </button>
+            <button onclick="evaluateExpression()">Evaluate</button>
         </div>
 
         <div class="result-section">
@@ -83,13 +89,12 @@
         </div>
 
         <div class="instructions">
-            <h3><i class="fas fa-info-circle"></i> How to use:</h3>
+            <h3>How to use:</h3>
             <ul>
                 <li>Select True/False for variables p, q, r</li>
                 <li>Enter a logical expression using: and, or, not</li>
                 <li>Use variables: p, q, r</li>
                 <li>Click Evaluate to see the result</li>
-                <li>Toggle the theme switch for dark/light mode</li>
             </ul>
         </div>
     </div>
@@ -97,7 +102,7 @@
     <!-- Contact Section -->
     <div class="contact-section">
         <div class="contact-container">
-            <h3><i class="fas fa-envelope"></i> Contact Us</h3>
+            <h3>Contact Us</h3>
             <div class="contact-grid">
                 <div class="contact-item">
                     <span class="contact-icon">📧</span>
@@ -111,7 +116,7 @@
                     <span class="contact-icon">💼</span>
                     <div class="contact-details">
                         <h4>LinkedIn</h4>
-                        <a href="https://www.linkedin.com/in/ajay-jatav-b15428207" target="_blank">@ajay-jatav</a>
+                        <a href="https://www.linkedin.com/in/ajay-jatav-b15428207?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" target="_blank">@ajay-jatav</a>
                     </div>
                 </div>
                 
@@ -135,31 +140,10 @@
     </div>
 
     <script>
-        // Theme switching functionality
-        const themeSwitch = document.getElementById('theme-checkbox');
-        
-        // Check for saved theme preference or respect OS preference
-        if (localStorage.getItem('theme') === 'dark' || 
-            (window.matchMedia('(prefers-color-scheme: dark)').matches && !localStorage.getItem('theme'))) {
-            document.body.classList.add('dark-theme');
-            themeSwitch.checked = true;
-        }
-
-        themeSwitch.addEventListener('change', function() {
-            if (this.checked) {
-                document.body.classList.add('dark-theme');
-                localStorage.setItem('theme', 'dark');
-            } else {
-                document.body.classList.remove('dark-theme');
-                localStorage.setItem('theme', 'light');
-            }
-        });
-
         function evaluateExpression() {
-            // Get values as strings "true"/"false" and convert to actual booleans
-            const p = document.getElementById('p').value === 'true';
-            const q = document.getElementById('q').value === 'true';
-            const r = document.getElementById('r').value === 'true';
+            const p = document.getElementById('p').value;
+            const q = document.getElementById('q').value;
+            const r = document.getElementById('r').value;
             const expr = document.getElementById('expr').value.trim();
 
             if (!expr) {
@@ -177,7 +161,7 @@
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    p: p,  // Now sending actual boolean values
+                    p: p,
                     q: q,
                     r: r,
                     expr: expr
@@ -205,12 +189,6 @@
                 evaluateExpression();
             }
         });
-
-        // Quick test buttons
-        function quickTest(expression) {
-            document.getElementById('expr').value = expression;
-            evaluateExpression();
-        }
     </script>
 </body>
 </html>
