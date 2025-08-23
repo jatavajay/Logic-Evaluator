@@ -4,120 +4,80 @@ import os
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
 def LogicEval(p, q, r, expr):
-    # Debug print
-    print(f"Evaluating: p={p}, q={q}, r={r}, expr='{expr}'")
-    
-    # Replace variables with their values
-    expr = expr.replace("p", str(p))
-    expr = expr.replace("q", str(q))
-    expr = expr.replace("r", str(r))
-    
-    # Convert to tokens with proper handling of parentheses
-    tokens = tokenize(expr)
-    
-    # Evaluate the expression
-    result = evaluate_expression(tokens)
-    return result
+    """Evaluate logical expression with variables p, q, r"""
+    try:
+        # Create variable mapping
+        variables = {
+            'p': bool(p),
+            'q': bool(q),
+            'r': bool(r)
+        }
+        
+        print(f"Debug: p={p}, q={q}, r={r}")
+        print(f"Debug: Original expr: {expr}")
+        
+        # First substitute variables in the expression
+        expr_substituted = substitute_variables(expr, variables)
+        print(f"Debug: After substitution: {expr_substituted}")
+        
+        # Evaluate the substituted expression
+        result = evaluate_logical_expression(expr_substituted)
+        print(f"Debug: Result: {result}")
+        
+        return bool(result)
+        
+    except Exception as e:
+        print(f"Debug: Evaluation error: {e}")
+        return False
 
-def tokenize(expr):
-    """Convert expression string into tokens"""
-    # Add spaces around operators and parentheses for proper splitting
-    expr = expr.replace('(', ' ( ')
-    expr = expr.replace(')', ' ) ')
-    expr = expr.replace('not', ' not ')
-    expr = expr.replace('and', ' and ')
-    expr = expr.replace('or', ' or ')
+def substitute_variables(expr, variables):
+    """Replace variables with their boolean values in the expression"""
+    # Replace variables with True/False
+    for var, value in variables.items():
+        # Use word boundaries to avoid partial replacements
+        import re
+        pattern = r'\b' + var + r'\b'
+        replacement = 'True' if value else 'False'
+        expr = re.sub(pattern, replacement, expr)
     
-    # Split and filter out empty strings
-    tokens = [token for token in expr.split() if token]
-    return tokens
+    return expr
 
-def evaluate_expression(tokens):
-    """Evaluate tokenized expression with proper operator precedence and parentheses"""
-    # Convert tokens to values and operators
-    parsed_tokens = []
-    for token in tokens:
-        if token == 'True':
-            parsed_tokens.append(True)
-        elif token == 'False':
-            parsed_tokens.append(False)
-        elif token in ('and', 'or', 'not', '(', ')'):
-            parsed_tokens.append(token)
-        else:
-            if isinstance(token, bool):
-                parsed_tokens.append(token)
-            else:
-                parsed_tokens.append(False)
-    
-    def eval_parentheses(tokens):
-        stack = []
-        for token in tokens:
-            if token == ')':
-                inner_expr = []
-                while stack and stack[-1] != '(':
-                    inner_expr.append(stack.pop())
-                if stack and stack[-1] == '(':
-                    stack.pop()
-                inner_expr.reverse()
-                result = eval_operators(inner_expr)
-                stack.append(result)
-            else:
-                stack.append(token)
-        return stack
-    
-    def eval_operators(tokens):
-        tokens = eval_not(tokens)
-        tokens = eval_and(tokens)
-        tokens = eval_or(tokens)
-        return tokens[0] if len(tokens) == 1 else False
-    
-    def eval_not(tokens):
-        result = []
-        i = 0
-        while i < len(tokens):
-            if tokens[i] == 'not':
-                if i + 1 < len(tokens):
-                    result.append(not tokens[i + 1])
-                    i += 2
-                else:
-                    result.append(False)
-                    i += 1
-            else:
-                result.append(tokens[i])
-                i += 1
-        return result
-    
-    def eval_and(tokens):
-        result = []
-        i = 0
-        while i < len(tokens):
-            if i + 2 < len(tokens) and tokens[i + 1] == 'and':
-                left = tokens[i]
-                right = tokens[i + 2]
-                result.append(left and right)
-                i += 3
-            else:
-                result.append(tokens[i])
-                i += 1
-        return result
-    
-    def eval_or(tokens):
-        result = []
-        i = 0
-        while i < len(tokens):
-            if i + 2 < len(tokens) and tokens[i + 1] == 'or':
-                left = tokens[i]
-                right = tokens[i + 2]
-                result.append(left or right)
-                i += 3
-            else:
-                result.append(tokens[i])
-                i += 1
-        return result
-    
-    tokens_after_parentheses = eval_parentheses(parsed_tokens)
-    final_result = eval_operators(tokens_after_parentheses)
-    return bool(final_result)
+def evaluate_logical_expression(expr):
+    """Safely evaluate a logical expression containing only True, False, and, or, not, parentheses"""
+    try:
+        # Clean the expression
+        expr = expr.strip()
+        
+        # Replace logical operators with Python equivalents
+        expr = expr.replace(' and ', ' and ')
+        expr = expr.replace(' or ', ' or ')
+        expr = expr.replace(' not ', ' not ')
+        
+        # Ensure proper spacing around operators
+        import re
+        expr = re.sub(r'\band\b', ' and ', expr)
+        expr = re.sub(r'\bor\b', ' or ', expr)
+        expr = re.sub(r'\bnot\b', ' not ', expr)
+        
+        # Only allow safe characters and keywords
+        allowed_chars = set('TrueFalse andornot()' + ' ')
+        if not all(c in allowed_chars for c in expr):
+            raise ValueError("Invalid characters in expression")
+        
+        # Only allow specific keywords
+        allowed_words = {'True', 'False', 'and', 'or', 'not'}
+        words = re.findall(r'\b\w+\b', expr)
+        if not all(word in allowed_words for word in words):
+            raise ValueError("Invalid keywords in expression")
+        
+        # Safely evaluate the expression
+        result = eval(expr, {"__builtins__": {}}, {"True": True, "False": False, "and": lambda x, y: x and y, "or": lambda x, y: x or y, "not": lambda x: not x})
+        
+        return bool(result)
+        
+    except Exception as e:
+        print(f"Evaluation error: {e}")
+        return False
 
 @app.route('/')
 def index():
@@ -130,34 +90,19 @@ def index():
 def evaluate():
     try:
         data = request.get_json()
-        print(f"Received data: {data}")
-        
         p = data.get('p', False)
         q = data.get('q', False)
         r = data.get('r', False)
         expr = data.get('expr', '')
         
-        # Convert to boolean (handle both string and boolean inputs)
-        if isinstance(p, str):
-            p = p.lower() == 'true'
-        if isinstance(q, str):
-            q = q.lower() == 'true'
-        if isinstance(r, str):
-            r = r.lower() == 'true'
+        p = p.lower() == 'true' if isinstance(p, str) else bool(p)
+        q = q.lower() == 'true' if isinstance(q, str) else bool(q)
+        r = r.lower() == 'true' if isinstance(r, str) else bool(r)
         
-        p = bool(p)
-        q = bool(q)
-        r = bool(r)
-        
-        print(f"Boolean values - p: {p}, q: {q}, r: {r}")
-        print(f"Expression: {expr}")
-        
+        expr = expr.strip()
         result = LogicEval(p, q, r, expr)
-        print(f"Result: {result}")
-        
         return jsonify({'result': str(result)})
     except Exception as e:
-        print(f"Error: {str(e)}")
         return jsonify({'error': f'Evaluation error: {str(e)}'})
 
 if __name__ == '__main__':
